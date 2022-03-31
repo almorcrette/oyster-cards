@@ -26,6 +26,11 @@ class Oystercard
   end
 
   def touch_in(station)
+    if @current_journey !=nil
+      @current_journey.end_journey(:unknown)
+      journeys.push(@current_journey)
+      deduct(PENALTY_FARE)
+    end
     fail "Insufficient balance" if insufficient_balance?
     journey = Journey.new(station)
     @current_journey = journey

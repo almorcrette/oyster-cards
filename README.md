@@ -2,7 +2,7 @@
 
 Makers Academy week 2 pairing challenge.
 
-Repo that Joe Newman and Alexis Morcrette are working on on Tuesday 29 March.
+Repo that Joe Newman and Alexis Morcrette are working on on Wednesday 30 March and that Alexis and Coral worked on on Thursday 31 March
 
 ## Getting started
 
