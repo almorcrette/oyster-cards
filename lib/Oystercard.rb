@@ -5,8 +5,8 @@ class Oystercard
   attr_reader :balance, :limit, :journeys, :current_journey
 
   LIMIT = 90.0
-  MINIMUM = 1.0
-  PENALTY_FARE = 6.0
+  MINIMUM = 1.0 # will become redundant
+  PENALTY_FARE = 6.0 # will become redundant
   
   def initialize
     @balance = 0.0
@@ -39,11 +39,11 @@ class Oystercard
   def touch_out(station)
     if @current_journey == nil
       @current_journey = Journey.new(:unknown)
-      deduct(PENALTY_FARE)
+      deduct(PENALTY_FARE) #Need to end_journey first and then deduct the @current_journey.fare
     else
-      deduct(MINIMUM)
+      deduct(MINIMUM) #Need to end_journey first and then deduct the @current_journey.fare
     end
-    @current_journey.end_journey(station)
+    @current_journey.end_journey(station) #need to move this above deduct fares once fars are queried from @current_journey.fare
     journeys.push(@current_journey)
     @current_journey = nil
   end
@@ -60,6 +60,6 @@ private
   end
 
   def insufficient_balance?
-    @balance < MINIMUM
+    @balance < MINIMUM #MINIMUM needs to query a journey, this may be an issue. May need to keep MIN in oystercard object
   end
 end

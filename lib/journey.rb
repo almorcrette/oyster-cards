@@ -18,11 +18,7 @@ class Journey
   end
 
   def fare
-    p 'Printing entry from PD:'
-    p @entry_station
-    p 'Printing exit from PD:'
-    p @exit_station
-    if @entry_station == :unknown || @exit_station == :unknown
+    if @entry_station == :unknown || @exit_station == :unknown # Not SRP. Refactor this with private method #is_penalty_journey?
       PENALTY_FARE
     else
       MINIMUM

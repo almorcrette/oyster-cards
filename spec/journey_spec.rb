@@ -3,6 +3,7 @@ require_relative '../lib/journey'
 describe Journey do
   let(:journey) { Journey.new(:station0) }
   let(:station1) { double (:Station) }
+  let(:station2) { double (:Station) }
   
   it "has an entry station when created" do
     expect(journey.entry_station).to eq :station0
@@ -24,23 +25,21 @@ describe Journey do
 
   context '#fare' do
 
-    # it "returns £1 unless it's a penalty journey" do
-    #   expect(journey.fare).to eq Journey::MINIMUM
-    # end
+    it "returns £1 unless it's a penalty journey" do
+      expect(journey.fare).to eq Journey::MINIMUM
+    end
 
     it "returns £6 if there is no touch_out" do
       journey2 = Journey.new(station1)
-      p journey2
       journey2.end_journey(:unknown)
-      p journey2
-      expect(journey.fare).to eq Journey::PENALTY_FARE
+      expect(journey2.fare).to eq Journey::PENALTY_FARE #Read this Coral. We'd written expect(journey.fare)...
     end
 
-    # it "returns £6 if there is no touch_in" do
-    #   journey2 = Journey.new(:unknown)
-    #   journey2.end_journey(station1)
-    #   expect(journey2.fare).to eq Journey::PENALTY_FARE
-    # end  
+    it "returns £6 if there is no touch_in" do
+      journey2 = Journey.new(:unknown)
+      journey2.end_journey(station1)
+      expect(journey2.fare).to eq Journey::PENALTY_FARE
+    end  
   end
 end
 
