@@ -26,6 +26,7 @@ describe Journey do
   context '#fare' do
 
     it "returns £1 unless it's a penalty journey" do
+      journey.end_journey(station1)
       expect(journey.fare).to eq Journey::MINIMUM
     end
 
