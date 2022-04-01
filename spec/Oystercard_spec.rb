@@ -5,6 +5,11 @@ describe Oystercard do
   let (:station) { double (:station) }
   let (:station2) { double (:station) }
   let (:journey) { double (:journey) }
+  let(:journey_log_double) { double :journey_log }
+  let(:journey_class_double) { double :journey_class }
+  let(:journey_records) { [{entry_station: station, exit_station: station2, fare: 1.0}] }
+
+  let(:card) { Oystercard.new(journey_log_double) }
 
   it "has a balance when created" do
     expect(subject.balance).to eq 0.0
@@ -27,7 +32,7 @@ describe Oystercard do
     expect {subject.top_up(1) }.to raise_error("Top-up will exceed limit of £#{subject.limit}")
   end
 
-  it {is_expected.to respond_to(:in_journey?)}
+  # it {is_expected.to respond_to(:in_journey?)}
 
   it "will not touch in if balance is below the minimum fare" do
     expect { subject.touch_in(:station) }.to raise_error("Insufficient balance")
@@ -46,14 +51,14 @@ describe Oystercard do
     end
 
     it "is 'in journey'" do
-      allow(journey).to receive(:complete?).and_return(false)
-      expect(subject.in_journey?).to be true
+      allow(journey_log_double).to receive(:on_going_journey?).and_return(true)
+      expect(card.in_journey?).to be true
     end
 
     it "is not 'in journey' if it has been touched out" do
-      allow(journey).to receive(:complete?).and_return(true)
+      allow(journey_log_double).to receive(:on_going_journey?).and_return(false)
       subject.touch_out(station2)
-      expect(subject.in_journey?).to be false
+      expect(card.in_journey?).to be false
     end
   end
 
@@ -68,8 +73,10 @@ describe Oystercard do
     end
 
     it "logs the entire journey" do
-      subject.touch_out(station2)
-      expect(subject.journeys[-1]).to be_an_instance_of(Journey)
+      p subject.touch_out(station2)
+      allow(journey_log_double).to receive(:on_going_journey?).and_return(true)
+      allow(journey_log_double).to receive(:record_journey).and_return(journey_records)
+      expect(subject.journeys).to eq(journey_records)
     end
   end
 
@@ -77,7 +84,11 @@ describe Oystercard do
 
     context "if touched out without touching in" do 
       it 'deducts the penalty fare from balance' do
-        expect { subject.touch_out(station2) }.to change { subject.balance }.by(-6.0)
+        allow(journey_log_double).to receive(:on_going_journey?).and_return(false)
+        allow(journey_log_double).to receive(:finish)
+        allow(journey_log_double).to receive(:start).and_return(journey)
+        allow(journey).to receive(:new).and_return(:unknown)
+        expect { card.touch_out(station2) }.to change { subject.balance }.by(-6.0)
       end
 
       it "logs the penalty journey" do

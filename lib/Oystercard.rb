@@ -1,17 +1,18 @@
 require_relative './journey'
 require_relative './station'
+require_relative './journey_log'
 
 class Oystercard
-  attr_reader :balance, :limit, :journeys, :current_journey
+  attr_reader :balance, :limit, :journeys, :current_journey, :journey_log
 
   LIMIT = 90.0
   MIN_BALANCE = 1.0 # will become redundant
   
-  def initialize
+  def initialize(journey_log = JourneyLog.new)
     @balance = 0.0
     @limit = LIMIT
     @journeys = []
-    @current_journey = nil
+    @journey_log = journey_log
   end
 
   def top_up(amount)
@@ -21,26 +22,22 @@ class Oystercard
   end
 
   def in_journey?
-    @current_journey != nil
+    @journey_log.on_going_journey?
   end
 
   def touch_in(station)
-    if @current_journey !=nil
+    if @journey_log.on_going_journey?
       force_touch_out
     end
     fail "Insufficient balance" if insufficient_balance?
-    journey = Journey.new(station)
-    @current_journey = journey
+    journey = @journey_log.start(station)
   end
 
   def touch_out(station)
-    if @current_journey == nil
-      force_touch_in
-    else
-      finish_journey
+    if @journey_log.on_going_journey? == false
+      force_touch_in(:unknown)
     end
-    journeys.push(@current_journey)
-    @current_journey = nil
+    @journey_log.finish(station)
   end
 
 private
@@ -59,19 +56,17 @@ private
   end
 
   def force_touch_out
-    @current_journey.end_journey(:unknown)
-    journeys.push(@current_journey)
-    deduct(@current_journey.fare)
+    @journey_log.finish(:unknown)
+    deduct(@journey_log.journeys.last[:fare])
   end
 
-  def force_touch_in
-    @current_journey = Journey.new(:unknown)
-    finish_journey
+  def force_touch_in(station)
+    @journey_log.start(:unknown)
   end
 
-  def finish_journey
-    @current_journey.end_journey(station)
-    deduct(@current_journey.fare)
+  def finish_journey(station)
+    @journey_log.finish(station)
+    deduct(@journey_log.journeys.last[:fare])
   end
 
 end
